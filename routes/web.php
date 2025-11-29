@@ -1,11 +1,13 @@
 <?php
 
+use App\Exports\HasilEvaluasiExport;
+use Maatwebsite\Excel\Facades\Excel;
 use Illuminate\Support\Facades\Route;
-use App\Http\Controllers\ProfileController;
-use App\Http\Controllers\AdminController;
 use App\Http\Controllers\FormController;
-use App\Http\Controllers\EvaluationController;
+use App\Http\Controllers\AdminController;
+use App\Http\Controllers\ProfileController;
 use App\Http\Controllers\QuestionController;
+use App\Http\Controllers\EvaluationController;
 
 /*
 |--------------------------------------------------------------------------|
@@ -23,6 +25,11 @@ Route::post('/form/{form}/submit', [EvaluationController::class, 'submit'])->nam
 Route::get('/form/{form}/already-submitted', [EvaluationController::class, 'alreadySubmitted'])->name('already_submitted');
 
 Route::post('/forms/{form}/questions/import', [QuestionController::class, 'import'])->name('forms.questions.import');
+
+Route::get('/export/excel/{id}', function($id) {
+    $form = App\Models\Form::findOrFail($id);
+    return Excel::download(new HasilEvaluasiExport($form), 'hasil_evaluasi.xlsx');
+})->name('export.hasil');
 
 
 /*

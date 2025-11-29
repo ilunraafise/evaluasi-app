@@ -2,10 +2,12 @@
 
 namespace App\Http\Controllers;
 
-use Illuminate\Http\Request;
 use App\Models\Form;
-use App\Models\Respondent;
 use App\Models\Answer;
+use App\Models\Respondent;
+use Illuminate\Http\Request;
+use App\Exports\HasilEvaluasiExport;
+use Maatwebsite\Excel\Facades\Excel;
 
 class EvaluationController extends Controller
 {
@@ -47,5 +49,10 @@ class EvaluationController extends Controller
     public function alreadySubmitted(Form $form)
     {
         return view('evaluation.already_submitted', compact('form'));
+    }
+
+    public function export(Form $form)
+    {
+        return Excel::download(new HasilEvaluasiExport($form), 'hasil_evaluasi.xlsx');
     }
 }
