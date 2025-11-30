@@ -1,32 +1,33 @@
-# Base PHP Image
 FROM php:8.2-fpm
 
 # Install system dependencies
 RUN apt-get update && apt-get install -y \
-    git curl zip unzip libpq-dev libonig-dev libzip-dev libpng-dev \
-    && docker-php-ext-install pdo pdo_mysql zip gd
+    git curl unzip libpng-dev libzip-dev zip && \
+    docker-php-ext-install gd zip pdo pdo_mysql
 
 # Install Composer
-COPY --from=composer:latest /usr/bin/composer /usr/bin/composer
+COPY --from=composer:2 /usr/bin/composer /usr/bin/composer
 
-# Set Working Directory
-WORKDIR /var/www/html
+# 🟢 Install Node.js & NPM (ini yg bikin npm jadi available)
+RUN curl -fsSL https://deb.nodesource.com/setup_18.x | bash - && \
+    apt-get install -y nodejs
 
-# Copy Project Files
+# Set working dir
+WORKDIR /var/www/app
+
+# Copy composer files & install dependencies
+COPY composer.json composer.lock ./
+RUN composer install --optimize-autoloader --no-interaction
+
+# Copy app
 COPY . .
 
-# Install PHP Dependencies
-RUN composer install --optimize-autoloader --no-interaction --no-scripts
-
-# Build frontend (jika pakai Vite)
+# 🟢 Build front-end (Vite)
 RUN if [ -f package.json ]; then \
         npm install && npm run build; \
     fi
 
-# Generate key
-RUN php artisan key:generate
-
+# Expose port
 EXPOSE 8080
 
-# Start server
 CMD php artisan serve --host=0.0.0.0 --port=8080
