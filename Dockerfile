@@ -1,19 +1,32 @@
+# Base PHP Image
 FROM php:8.2-fpm
 
-# Install extensions yang diperlukan Laravel + Excel
+# Install system dependencies
 RUN apt-get update && apt-get install -y \
-    git curl zip unzip libpng-dev libjpeg62-turbo-dev libfreetype6-dev \
-    && docker-php-ext-configure gd --with-freetype --with-jpeg \
-    && docker-php-ext-install gd pdo pdo_mysql
+    git curl zip unzip libpq-dev libonig-dev libzip-dev libpng-dev \
+    && docker-php-ext-install pdo pdo_mysql zip gd
 
 # Install Composer
 COPY --from=composer:latest /usr/bin/composer /usr/bin/composer
 
-# Copy project ke dalam container
+# Set Working Directory
 WORKDIR /var/www/html
+
+# Copy Project Files
 COPY . .
 
-# Install dependencies
+# Install PHP Dependencies
 RUN composer install --optimize-autoloader --no-interaction --no-scripts
 
-CMD php-fpm
+# Build frontend (jika pakai Vite)
+RUN if [ -f package.json ]; then \
+        npm install && npm run build; \
+    fi
+
+# Generate key
+RUN php artisan key:generate
+
+EXPOSE 8080
+
+# Start server
+CMD php artisan serve --host=0.0.0.0 --port=8080
