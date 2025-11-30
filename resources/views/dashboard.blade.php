@@ -1,5 +1,10 @@
-<x-app-layout>
-    <div class="flex h-screen bg-gray-50" x-data="{ sidebarOpen: true }">
+<x-app-layout :noNav="true">
+    <style>
+        body, main, .min-h-screen { padding:0!important; margin:0!important; }
+    </style>
+
+    <div class="flex min-h-screen bg-gray-50" x-data="{ sidebarOpen: true }">
+
         <!-- Sidebar -->
         <div :class="sidebarOpen ? 'w-64' : 'w-16'" class="bg-white border-r transition-all duration-300 flex flex-col">
             <div class="flex items-center justify-between h-16 px-4 border-b">
